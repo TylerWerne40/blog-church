@@ -1,0 +1,6 @@
+[run]
+source = basis
+omit = 
+    tests/*
+    autoapp.py
+

@@ -1,0 +1,6 @@
+
+# build the bundled files using webpack
+npx webpack --mode production --no-cache
+
+# run flask
+flask run
