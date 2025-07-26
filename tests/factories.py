@@ -3,8 +3,8 @@
 from factory import Sequence
 from factory.alchemy import SQLAlchemyModelFactory
 
-from basis.database import db
-from basis.user.models import User
+from app.database import db
+from app.user.models import User
 
 
 class BaseFactory(SQLAlchemyModelFactory):

@@ -1,5 +1,5 @@
 {
-   "name": "basis",
+   "name": "app",
    "env": {
       "SECRET_KEY": {
          "description": "SECRET_KEY.",

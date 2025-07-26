@@ -5,8 +5,8 @@ import sys
 
 from flask import Flask, render_template
 
-from basis import commands, public, user
-from basis.extensions import (
+from app import commands, public, user
+from app.extensions import (
     bcrypt,
     cache,
     csrf_protect,
@@ -18,7 +18,7 @@ from basis.extensions import (
 )
 
 
-def create_app(config_object="basis.settings"):
+def create_app(config_object="app.settings"):
     """Create application factory, as explained here: http://flask.pocoo.org/docs/patterns/appfactories/.
 
     :param config_object: The configuration object to use.

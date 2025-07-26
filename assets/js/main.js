@@ -1,5 +1,5 @@
 /*
- * Main Javascript file for basis.
+ * Main Javascript file for app.
  *
  * This file bundles all of your javascript together using webpack.
  */

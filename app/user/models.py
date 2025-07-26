@@ -5,8 +5,8 @@ import datetime as dt
 from flask_login import UserMixin
 from sqlalchemy.ext.hybrid import hybrid_property
 
-from basis.database import Column, PkModel, db, reference_col, relationship
-from basis.extensions import bcrypt
+from app.database import Column, PkModel, db, reference_col, relationship
+from app.extensions import bcrypt
 
 
 class Role(PkModel):

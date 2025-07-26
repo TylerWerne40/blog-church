@@ -1,7 +1,7 @@
 {
-  "name": "basis",
+  "name": "app",
   "version": "1.0.0",
-  "description": "basis for flask apps",
+  "description": "Church blog. It uses Flask and Python",
   "scripts": {
     "build": "run-script-os",
     "build:win32": "SET NODE_ENV=production && webpack --progress --color --optimization-minimize && npm run flask-static-digest",
@@ -18,7 +18,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/@TylerWerne40/basis.git"
+    "url": "git+https://github.com/@TylerWerne40/blog-church.git"
   },
   "author": "Tyler Dean Werne",
   "license": "MIT",
@@ -26,19 +26,19 @@
     "node": ">=v22.8.0"
   },
   "bugs": {
-    "url": "https://github.com/@TylerWerne40/basis/issues"
+    "url": "https://github.com/@TylerWerne40/church-blog/issues"
   },
-  "homepage": "https://github.com/@TylerWerne40/basis#readme",
+  "homepage": "https://github.com/@TylerWerne40/blog-church#readme",
   "dependencies": {
     "@fortawesome/fontawesome-free": "6.7.2",
+    "@popperjs/core": "2.11.8",
     "bootstrap": "5.3.7",
-    "jquery": "3.7.1",
-    "@popperjs/core": "2.11.8"
+    "jquery": "3.7.1"
   },
   "devDependencies": {
     "@babel/core": "7.28.0",
-    "@babel/preset-env": "7.28.0",
     "@babel/eslint-parser": "7.28.0",
+    "@babel/preset-env": "7.28.0",
     "babel-loader": "10.0.0",
     "chokidar": "4.0.3",
     "concurrently": "9.2.0",
@@ -51,7 +51,7 @@
     "mini-css-extract-plugin": "2.9.2",
     "prettier": "3.6.2",
     "run-script-os": "1.1.6",
-    "webpack": "5.100.2",
-    "webpack-cli": "6.0.1"
+    "webpack": "^5.100.2",
+    "webpack-cli": "^6.0.1"
   }
 }
