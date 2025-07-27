@@ -19,6 +19,7 @@ class CRUDMixin(object):
     def create(cls, **kwargs):
         """Create a new record and save it the database."""
         instance = cls(**kwargs)
+        db.session.commit()
         return instance.save()
 
     def update(self, commit=True, **kwargs):
