@@ -84,3 +84,88 @@ footer .footer-nav {
   margin-right: 25px;
   list-style: none;
 }
+
+/* navbar */ 
+
+nav ul li {
+  display: flex;
+}
+
+nav.navbar .navbar-collapse {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  flex-wrap: nowrap !important;
+  width: 100% !important;
+}
+
+nav.navbar .navbar-collapse ul.navbar-nav {
+  display: flex !important;
+  flex-wrap: nowrap !important;
+  align-items: center !important;
+}
+
+nav.navbar .navbar-collapse .nav-item {
+  margin-right: 15px !important;
+}
+
+nav.navbar .navbar-collapse .nav-item:last-child {
+  margin-right: 0 !important;
+}
+
+nav.navbar .navbar-collapse .navbar-right {
+  display: flex !important;
+  align-items: center !important;
+  flex-wrap: nowrap !important;
+}
+
+nav.navbar .navbar-collapse .navbar-nav + .navbar-right {
+  margin-left: 20px !important;
+}
+
+nav.navbar .navbar-collapse .navbar-right ul.navbar-nav {
+  display: flex !important;
+  align-items: center !important;
+}
+
+nav.navbar .navbar-collapse .navbar-right .nav-item {
+  margin-right: 10px !important;
+}
+
+nav.navbar .navbar-collapse .navbar-right .nav-item:last-child {
+  margin-right: 0 !important;
+}
+
+/* Ensure the form fits in the row */
+nav.navbar .navbar-collapse .navbar-right form {
+  display: flex !important;
+  align-items: center !important;
+}
+
+nav.navbar .navbar-collapse .navbar-right .input-group {
+  display: flex !important;
+  margin-right: 10px !important;
+}
+
+nav.navbar .navbar-collapse .navbar-right .form-control {
+  width: auto !important;
+  min-width: 100px !important;
+  margin-right: 5px !important;
+}
+
+nav.navbar .navbar-collapse .navbar-right button {
+  margin-left: 5px !important;
+}
+
+/* Override Bootstrap collapse on small screens (for testing) */
+@media (max-width: 991px) {
+  nav.navbar .navbar-collapse {
+    display: flex !important;
+  }
+  nav.navbar .navbar-collapse ul.navbar-nav {
+    display: flex !important;
+  }
+  nav.navbar .navbar-collapse .navbar-right ul.navbar-nav {
+    display: flex !important;
+  }
+}

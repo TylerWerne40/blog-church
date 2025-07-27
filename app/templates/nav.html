@@ -19,33 +19,37 @@
       <li class="nav-item">
         <a class="nav-link" href="{{ url_for('public.about') }}">About</a>
       </li>
-    </ul>
-    {% if current_user and current_user.is_authenticated %}
-    <ul class="navbar-nav my-auto">
-      <li class="nav-item active">
-        <a class="nav-link" href="{{ url_for('user.members') }}">Logged in as {{ current_user.username }}</a>
-      </li>
       <li class="nav-item">
-        <a class="nav-link" href="{{ url_for('public.logout') }}">
-          <i class="fa-solid fa-arrow-right-from-bracket"></i>
-        </a>
-      </li>
+        <a class="nav-link" href="{{ url_for('public.articles_public') }}">Articles</a>
     </ul>
-    {% elif form %}
-    <form class="form-inline" id="loginForm" method="POST" action="{{ url_for('public.home') }}" role="login">
-      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
-      <div class="input-group mb-2 mr-sm-2">
-        {{ form.username(placeholder="Username", class_="form-control mr-sm-1 my-auto") }} {{ form.password(placeholder="Password",
-        class_="form-control mr-sm-1 my-auto") }}
-        <button class="btn btn-light btn-primary m-auto" type="submit">Login</button>
-      </div>
-    </form>
-    <ul class="navbar-nav my-auto">
-      <li class="nav-item">
-        <a class="nav-link navbar-text" href="{{ url_for('public.register') }}">Create account</a>
-      </li>
-    </ul>
-    {% endif %}
+    <div class="navbar-right">
+      {% if current_user and current_user.is_authenticated %}
+      <ul class="navbar-nav my-auto">
+        <li class="nav-item active">
+          <a class="nav-link" href="{{ url_for('user.members') }}">Logged in as {{ current_user.username }}</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="{{ url_for('public.logout') }}">
+            <i class="fa-solid fa-arrow-right-from-bracket">Logout</i>
+          </a>
+        </li>
+      </ul>
+      {% elif form %}
+      <form class="form-inline" id="loginForm" method="POST" action="{{ url_for('public.home') }}" role="login">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+        <div class="input-group mb-2 mr-sm-2">
+          {{ form.username(placeholder="Username", class_="form-control mr-sm-1 my-auto") }} {{ form.password(placeholder="Password",
+          class_="form-control mr-sm-1 my-auto") }}
+          <button class="btn btn-light btn-primary m-auto" type="submit">Login</button>
+        </div>
+      </form>
+      <ul class="navbar-nav my-auto">
+        <li class="nav-item">
+          <a class="nav-link navbar-text" href="{{ url_for('public.register') }}">Create account</a>
+        </li>
+      </ul>
+      {% endif %}
+    </div>
   </div><!-- /.navbar-collapse -->
   </div>
 </nav>

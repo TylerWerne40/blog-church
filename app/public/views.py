@@ -30,7 +30,6 @@ def load_user(user_id):
 def home():
     """Home page."""
     form = LoginForm(request.form)
-    current_app.logger.info("Hello from the home page!")
     # Handle logging in
     if request.method == "POST":
         
@@ -78,3 +77,8 @@ def about():
     """About page."""
     form = LoginForm(request.form)
     return render_template("public/about.html", form=form)
+
+@blueprint.route("/articles/")
+def articles_public():
+    """Public Articles Page"""
+    return render_template("public/articles.html")
