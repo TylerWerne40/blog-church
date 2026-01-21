@@ -58,13 +58,14 @@ def register():
     form = RegisterForm(request.form)
     if form.validate_on_submit():
         # form.password.data = bcrypt.generate_password_hash(form.password.data)
-        User.create(
+        user = User.create(
             username=form.username.data,
             email=form.email.data,
             password=form.password.data,
             active=True,
         )
-        flash("Thank you for registering. You can now log in.", "success")
+        login_user(user)
+        flash("Thank you for registering. You are now logged in.", "success")
         
         return redirect(url_for("public.home"))
     else:
