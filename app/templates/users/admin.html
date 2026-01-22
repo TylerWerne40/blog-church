@@ -1,0 +1,54 @@
+{% extends "layout.html" %}
+
+{% macro role_form(title, action_url, button_text, button_class, role_type, action_type, id_suffix) %}
+    <div class="mb-4">
+        <h5>{{ title }}</h5>
+        <form method="POST" action="{{ action_url }}" onsubmit="return confirm('Are you sure you want to {{ action_type }} {{ role_type }} privileges for this user?');">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+            <div class="mb-3">
+                <label for="{{ id_suffix }}Username" class="form-label">Username</label>
+                <input type="text" class="form-control" id="{{ id_suffix }}Username" name="username" required>
+            </div>
+            <button type="submit" class="btn {{ button_class }}">{{ button_text }}</button>
+        </form>
+    </div>
+{% endmacro %}
+
+{% block content %}
+    {% if current_user.is_admin %}
+    <div class="container">
+        <h1>Admin Dashboard</h1>
+        <h3>Welcome, {{ current_user.username }}!</h3>
+        <p>This is the admin-only page where you can manage the site.</p>
+        
+        <button class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#adminManagement" aria-expanded="false" aria-controls="adminManagement">
+            Manage Admins
+        </button>
+        
+        <button class="btn btn-primary ms-2" type="button" data-bs-toggle="collapse" data-bs-target="#writerManagement" aria-expanded="false" aria-controls="writerManagement">
+            Manage Writers
+        </button>
+        
+        <div class="collapse mt-4" id="adminManagement">
+            <div class="card card-body">
+                <h4>Admin Management</h4>
+                {{ role_form("Add Admin", url_for('user.add_admin'), "Add Admin", "btn-success", "admin", "grant", "addAdmin") }}
+                {{ role_form("Remove Admin", url_for('user.remove_admin'), "Remove Admin", "btn-danger", "admin", "revoke", "removeAdmin") }}
+            </div>
+        </div>
+        
+        <div class="collapse mt-4" id="writerManagement">
+            <div class="card card-body">
+                <h4>Writer Management</h4>
+                {{ role_form("Add Writer", url_for('user.add_writer'), "Add Writer", "btn-success", "writer", "grant", "addWriter") }}
+                {{ role_form("Remove Writer", url_for('user.remove_writer'), "Remove Writer", "btn-danger", "writer", "revoke", "removeWriter") }}
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="container">
+        <h1>Access Denied</h1>
+        <h3>You do not have permission to view this page.</h3>
+    </div>
+    {% endif %}
+{% endblock %}

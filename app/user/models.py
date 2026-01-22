@@ -40,6 +40,7 @@ class User(UserMixin, PkModel):
     last_name = Column(db.String(30), nullable=True)
     active = Column(db.Boolean(), default=False)
     is_admin = Column(db.Boolean(), default=False)
+    is_writer = Column(db.Boolean(), default=False)
 
     @hybrid_property
     def password(self):

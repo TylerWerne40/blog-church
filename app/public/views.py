@@ -83,3 +83,8 @@ def about():
 def articles_public():
     """Public Articles Page"""
     return render_template("public/articles.html")
+
+@blueprint.route("/admin/")
+def admins():
+    """Admins Page"""
+    return render_template("users/admin.html")
