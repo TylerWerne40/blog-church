@@ -1,0 +1,35 @@
+{% extends "layout.html" %}
+{% from "users/is_writer.html" import is_writer %}
+{% block content %}
+    {% call is_writer(current_user)%}
+    <div style="display: flex; justify-content: center; min-height: 100vh; padding: 20px;">
+        <div style="display: flex; align-items: start; gap: 20px;">
+            <div class="writer-dashboard-container" style="max-width: 500px; text-align: center;">
+                <h1>Writer Dashboard</h1>
+                <h3>Welcome, {{ current_user.username }}!</h3>
+                <p>This is the writer-only page where you can manage your content.</p>
+                
+                <h4 class="mt-4">Your Articles</h4>
+                {% if articles %}
+                <ul class="list-group">
+                    {% for article in articles %}
+                    <li class="list-group-item">
+                        <a href="/articles/{{ article.tag }}">{{ article.title }}</a>
+                        <small class="text-muted d-block">Updated: {{ article.updated_at.strftime('%Y-%m-%d %H:%M') }}</small>
+                    </li>
+                    {% endfor %}
+                </ul>
+                {% else %}
+                <p class="text-muted">You haven't written any articles yet.</p>
+                {% endif %}
+            </div>
+            
+            <div>
+                <a href="{{ url_for('user.compose_article') }}" class="btn btn-primary btn-lg">
+                    <i class="fa-solid fa-pen-to-square"></i> Compose
+                </a>
+            </div>
+        </div>
+    </div>
+    {% endcall %}
+{% endblock %} 

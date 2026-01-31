@@ -1,0 +1,10 @@
+{% macro is_writer(user) %}
+  {% if user.is_writer and user.is_authenticated %}
+    {{ caller() }}
+  {% else %}
+    <div class="container">
+      <h1>Access Denied</h1>
+      <h3>You do not have permission to view this page.</h3>
+    </div>
+  {% endif %}
+{% endmacro %}

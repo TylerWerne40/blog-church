@@ -23,6 +23,8 @@ module.exports = {
   context: __dirname,
   entry: {
     main_js: './assets/js/main',
+    file_upload_js: './assets/js/file-upload',
+    article_js: './assets/js/article-compose',
     main_css: [
       path.join(__dirname, 'node_modules', '@fortawesome', 'fontawesome-free', 'css', 'all.css'),
       path.join(__dirname, 'node_modules', 'bootstrap', 'dist', 'css', 'bootstrap.css'),

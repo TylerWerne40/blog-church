@@ -64,3 +64,24 @@ class User(UserMixin, PkModel):
     def __repr__(self):
         """Represent instance as a unique string."""
         return f"<User({self.username!r})>"
+
+
+class Article(PkModel):
+    """An article written by a user."""
+
+    __tablename__ = "articles"
+    username = Column(db.String(80), nullable=False)
+    title = Column(db.String(255), nullable=False)
+    tag = Column(db.String(80), unique=True, nullable=False)
+    content = Column(db.Text, nullable=False) # TODO:change to link to html later.
+    created_at = Column(
+        db.DateTime, nullable=False, default=dt.datetime.now(dt.timezone.utc)
+    )
+    updated_at = Column(
+        db.DateTime, nullable=False, default=dt.datetime.now(dt.timezone.utc), onupdate=dt.datetime.now(dt.timezone.utc)
+    )
+    approved = Column(db.Boolean(), default=False)
+
+    def __repr__(self):
+        """Represent instance as a unique string."""
+        return f"<Article({self.title!r})>"

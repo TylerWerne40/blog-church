@@ -44,6 +44,17 @@
                 {{ role_form("Remove Writer", url_for('user.remove_writer'), "Remove Writer", "btn-danger", "writer", "revoke", "removeWriter") }}
             </div>
         </div>
+        <div class="Approve Articles Section mt-4">
+            {% if pending %}
+            <a href="{{ url_for('user.approve_articles') }}" class="btn btn-warning btn-lg">
+                <i class="fa-solid fa-check"></i> Approve Articles
+            </a>
+            {% else %}
+            <div class="alert alert-info" role="alert">
+                There are no articles pending approval.
+            </div>
+            {% endif %}
+        </div>
     </div>
     {% else %}
     <div class="container">

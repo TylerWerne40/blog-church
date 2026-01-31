@@ -38,3 +38,8 @@ Flask-DebugToolbar==0.16.0
 
 # Environment variable parsing
 environs==14.2.0
+
+# Document conversion
+pypandoc==1.14
+pdfplumber==0.11.2
+python-docx==0.8.11

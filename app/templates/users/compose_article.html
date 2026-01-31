@@ -1,0 +1,109 @@
+{% extends "layout.html" %}
+{% from "users/is_writer.html" import is_writer %}
+{% block content %}
+    {% call is_writer(current_user) %}
+    <div style="display: flex; justify-content: center; min-height: 100vh; padding: 20px;">
+        <div style="max-width: 600px; width: 100%;">
+            <div class="writer-hello">
+                <h1>Compose New Article</h1>
+                <p>This is where you can compose a new article.</p>
+                {% if error %}
+                <div class="alert alert-danger" role="alert">
+                    {{ error }} 
+                </div>
+                {% endif %}
+            </div>
+            
+            <!-- Upload Document Section -->
+            <div class="mb-5">
+                <h4>Upload Document</h4>
+                <div class="file-import">
+                    <form id="fileUploadForm" enctype="multipart/form-data" data-upload-url="{{ url_for('user.upload_file') }}">
+                        <div class="mb-3">
+                            <label for="fileInput" class="form-label">Upload DOCX or PDF File</label>
+                            <input type="file" class="form-control" id="fileInput" name="file" accept=".pdf,.docx" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Convert to HTML</button>
+                    </form>
+                    <div id="conversionResult" style="margin-top: 20px;"></div>
+                </div>
+            </div>
+            
+            <!-- Write Article Section -->
+            <div>
+                <h4>Write Article</h4>
+                <form id="articleForm" method="POST" action="{{ url_for('user.create_article') }}">
+                    <div class="mb-3">
+                        <label for="articleTitle" class="form-label">Article Title</label>
+                        <input type="text" class="form-control" id="articleTitle" name="title" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="articleTag" class="form-label">Article Tag (URL slug)</label>
+                        <div class="input-group">
+                            <input type="text" class="form-control" id="articleTag" name="tag" placeholder="e.g., my-article-title" required>
+                            <span id="tagStatus" class="input-group-text"></span>
+                        </div>
+                        <small id="tagFeedback" class="form-text"></small>
+                    </div>
+                    <div class="mb-3">
+                        <label for="articleContent" class="form-label">Article Content</label>
+                        <!-- View Toggle Tabs -->
+                        <ul class="nav nav-tabs mb-2" role="tablist" style="border-bottom: 1px solid #dee2e6;">
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link active" id="normal-view-tab" type="button" role="tab" data-view="normal" style="border: 1px solid #dee2e6; border-bottom: none;">
+                                    Normal View
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="html-view-tab" type="button" role="tab" data-view="html" style="border: 1px solid #dee2e6; border-bottom: none; margin-left: 2px;">
+                                    HTML View
+                                </button>
+                            </li>
+                        </ul>
+                        <!-- Normal View with Toolbar -->
+                        <div id="normalViewContainer" style="display: block;">
+                            <!-- Formatting Toolbar -->
+                            <div class="mb-2" style="display: flex; flex-wrap: wrap; gap: 5px;">
+                                <!-- Heading Dropdown -->
+                                <div class="dropdown">
+                                    <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button" id="headingDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                        Heading
+                                    </button>
+                                    <ul class="dropdown-menu" aria-labelledby="headingDropdown">
+                                        <li><a class="dropdown-item" href="#" data-heading="p">Normal Text</a></li>
+                                        <li><hr class="dropdown-divider"></li>
+                                        <li><a class="dropdown-item" href="#" data-heading="h1">Heading 1</a></li>
+                                        <li><a class="dropdown-item" href="#" data-heading="h2">Heading 2</a></li>
+                                        <li><a class="dropdown-item" href="#" data-heading="h3">Heading 3</a></li>
+                                        <li><a class="dropdown-item" href="#" data-heading="h4">Heading 4</a></li>
+                                        <li><a class="dropdown-item" href="#" data-heading="h5">Heading 5</a></li>
+                                    </ul>
+                                </div>
+                                <div class="vr"></div>
+                                <button type="button" class="btn btn-outline-secondary btn-sm" id="btnBold" title="Bold"><strong>B</strong></button>
+                                <button type="button" class="btn btn-outline-secondary btn-sm" id="btnItalic" title="Italic"><em>I</em></button>
+                                <button type="button" class="btn btn-outline-secondary btn-sm" id="btnUnderline" title="Underline"><u>U</u></button>
+                                <button type="button" class="btn btn-outline-secondary btn-sm" id="btnStrikethrough" title="Strikethrough"><strike>S</strike></button>
+                                <div class="vr"></div>
+                                <button type="button" class="btn btn-outline-secondary btn-sm" id="btnHighlight" title="Highlight">🔆</button>
+                                <button type="button" class="btn btn-outline-secondary btn-sm" id="btnLink" title="Link">🔗</button>
+                            </div>
+                            <!-- Editable Content Area -->
+                            <div class="form-control" id="articleContent" style="min-height: 250px; padding: 10px; border: 1px solid #dee2e6; border-radius: 4px; overflow-y: auto;" contenteditable="true" required></div>
+                        </div>
+                        <!-- HTML View -->
+                        <textarea class="form-control" id="htmlContentView" rows="10" style="display: none; font-family: monospace;"></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Submit Article</button>
+                    <input type="hidden" id="contentInput" name="content">
+                </form>
+            </div>
+        </div>
+    </div>
+    {% endcall %}
+{% endblock %}
+
+{% block js %}
+<script src="{{ static_url_for('static', filename='build/file_upload_js.bundle.js') }}"></script>
+<script src="{{ static_url_for('static', filename='build/article_js.bundle.js') }}"></script>
+{% endblock %}
