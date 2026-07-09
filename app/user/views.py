@@ -2,9 +2,9 @@
 """User views."""
 from flask import Blueprint, render_template, abort, redirect, url_for, flash, request, jsonify
 from flask_login import login_required, current_user
-
 from app.user.models import User, Article
-from app.user.file_handler import save_uploaded_file, convert_to_html, allowed_file
+from app.user.file_handler import save_uploaded_file, convert_to_html, allowed_file, apply_bootstrap_classes
+from app.extensions import csrf_protect, db
 
 blueprint = Blueprint("user", __name__, url_prefix="/users", static_folder="../static")
 
@@ -42,7 +42,6 @@ def upload_file():
     if not current_user.is_writer:
         return jsonify({"error": "Unauthorized"}), 403
     
-    # Check if file was provided
     if 'file' not in request.files:
         return jsonify({"error": "No file provided"}), 400
     
@@ -54,20 +53,29 @@ def upload_file():
     if not allowed_file(file.filename):
         return jsonify({"error": "File type not allowed. Use PDF or DOCX"}), 400
     
-    # Save and convert file
-    file_path = save_uploaded_file(file)
-    if not file_path:
-        return jsonify({"error": "Failed to save file"}), 400
-    
-    # Get file extension
-    file_ext = file.filename.rsplit('.', 1)[1].lower()
-    
-    # Convert to HTML
-    html_content = convert_to_html(file_path, file_ext)
-    if not html_content:
-        return jsonify({"error": "Failed to convert file"}), 400
-    
-    return jsonify({"html": html_content}), 200
+    try:
+        
+        file_path = save_uploaded_file(file)
+        if not file_path:
+            return jsonify({"error": "Failed to save file"}), 500
+        
+        file_ext = file.filename.rsplit('.', 1)[1].lower()
+        
+        html_content = convert_to_html(file_path, file_ext)
+        
+        if not html_content:
+            return jsonify({"error": "Conversion failed. Check server logs."}), 400
+            
+        return jsonify({"html": html_content}), 200
+        
+    except Exception as e:
+        import traceback
+        print(f"CRITICAL ERROR in upload_file:\n{traceback.format_exc()}")
+        
+        try:
+            return jsonify({"error": "Server error"}), 500
+        except:
+            return "Internal Server Error", 500
 
 
 @blueprint.route("/article/create/", methods=["POST"])
@@ -92,13 +100,15 @@ def create_article():
         flash(f"Article tag '{tag}' already exists. Please use a different tag.", "danger")
         return redirect(url_for("user.compose_article", f"Article tag '{tag}' already exists. Please use a different tag."))
     
+    normalized_content = apply_bootstrap_classes(content)
+    
     # Create article
     try:
         article = Article.create(
             username=current_user.username,
             title=title,
             tag=tag,
-            content=content
+            content=normalized_content,
         )
         flash(f"Article '{title}' created successfully!", "success")
         return redirect(url_for("user.writers"))
@@ -244,6 +254,7 @@ def approve_article(article_id):
     article = Article.query.get_or_404(article_id)
     article.approved = True
     article.save()
+    db.session.commit()
     flash(f"Article '{article.title}' has been approved.", "success")
     
     return redirect(url_for("user.approve_articles"))
@@ -257,6 +268,7 @@ def reject_article(article_id):
     
     article = Article.query.get_or_404(article_id)
     article.delete()
+    db.session.commit()
     flash(f"Article '{article.title}' has been rejected and deleted.", "success")
     
     return redirect(url_for("user.approve_articles"))
@@ -271,11 +283,10 @@ def edit_article(article_id, edit=True):
     article = Article.query.get_or_404(article_id)
     
     if request.method == "POST":
-        title = request.form.get("title")
         content = request.form.get("content")
         
-        if title and content:
-            article.title = title
+        if content:
+            article.title = content.title
             article.content = content
             article.save()
             flash(f"Article '{article.title}' has been updated.", "success")

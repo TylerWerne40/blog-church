@@ -43,3 +43,5 @@ environs==14.2.0
 pypandoc==1.14
 pdfplumber==0.11.2
 python-docx==0.8.11
+beautifulsoup4==4.12.3
+bleach==6.0.0

@@ -9,8 +9,8 @@
   <!--<![endif]-->
   <head>
     <meta charset="utf-8" />
-
-    <link rel="shortcut icon" href="{{static_url_for('static', filename='build/favicon.ico') }}">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <link rel="shortcut icon" href="{{static_url_for('static', filename='build/orthodox_7253634.png') }}">
     <title>
       {% block page_title %} 
       Blog for the Orthodox of NM.

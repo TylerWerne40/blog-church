@@ -3,7 +3,7 @@
 import logging
 import sys
 
-from flask import Flask, render_template
+from flask import Flask, render_template, jsonify, request
 
 from app import commands, public, user
 from app.extensions import (
@@ -17,6 +17,9 @@ from app.extensions import (
     migrate,
 )
 
+# If you use app factory:
+# app = create_app()
+# register_error_handlers(app)
 
 def create_app(config_object="app.settings"):
     """Create application factory, as explained here: http://flask.pocoo.org/docs/patterns/appfactories/.
@@ -57,16 +60,35 @@ def register_blueprints(app):
 def register_errorhandlers(app):
     """Register error handlers."""
 
-    def render_error(error):
-        """Render error template."""
-        # If a HTTPException, pull the `code` attribute; default to 500
-        error_code = getattr(error, "code", 500)
-        return render_template(f"{error_code}.html"), error_code
+    @app.errorhandler(500)
+    def internal_error(error):
+        # Check if it's an AJAX request or one expecting JSON
+        if request.is_xhr or request_wants_json(request):
+            return jsonify({'error': 'Internal server error'}), 500
+        return render_template('500.html'), 500
 
-    for errcode in [401, 404, 500]:
-        app.errorhandler(errcode)(render_error)
+    @app.errorhandler(404)
+    def not_found(error):
+        """Page not found."""
+        if request_wants_json(request):
+            return jsonify({"error": "Not Found"}), 404
+    
+        return render_template("errors/404.html"), 404
+
+    @app.errorhandler(401)
+    def unauthorized(error):
+        if request_wants_json(request):
+            return jsonify({'error': 'Unauthorized'}), 401
+        return render_template('401.html'), 401
+
     return None
 
+def request_wants_json(request):
+    """Check if the client prefers JSON response."""
+    best = request.accept_mimetypes.best_match(['application/json', 'text/html'])
+    return (best == 'application/json' and 
+            request.accept_mimetypes['application/json'] > 
+            request.accept_mimetypes['text/html'])
 
 def register_shellcontext(app):
     """Register shell context objects."""

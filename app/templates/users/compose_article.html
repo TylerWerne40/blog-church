@@ -102,6 +102,11 @@
     </div>
     {% endcall %}
 {% endblock %}
+<script>
+    window.CSRF_TOKEN = "{{ csrf_token() }}";
+    const csrfMeta = document.querySelector('meta[name="csrf-token"]');
+    const csrfToken = csrfMeta ? csrfMeta.getAttribute("content") : null;
+</script>
 
 {% block js %}
 <script src="{{ static_url_for('static', filename='build/file_upload_js.bundle.js') }}"></script>
