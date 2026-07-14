@@ -5,6 +5,7 @@ from flask_login import login_required, current_user
 from app.user.models import User, Article
 from app.user.file_handler import save_uploaded_file, convert_to_html, allowed_file, apply_bootstrap_classes
 from app.extensions import csrf_protect, db
+import os
 
 blueprint = Blueprint("user", __name__, url_prefix="/users", static_folder="../static")
 
@@ -35,47 +36,66 @@ def compose_article(error=None):
     return render_template("users/compose_article.html", error=error)
 
 
-@blueprint.route("/upload/", methods=["POST"])
+@blueprint.route("/upload/") #, methods=["POST"])
 @login_required
 def upload_file():
     """Handle file upload and conversion."""
     if not current_user.is_writer:
         return jsonify({"error": "Unauthorized"}), 403
     
-    if 'file' not in request.files:
-        return jsonify({"error": "No file provided"}), 400
+    csrf_token = request.headers.get("X-CSRFToken") or request.form.get("csrf_token")
+    if not csrf_token:
+        return jsonify({"error": "Missing CSRF Token"}), 403
     
     file = request.files['file']
     
     if file.filename == '':
         return jsonify({"error": "No file selected"}), 400
     
+    submitted_title = request.form.get('title')
+    submitted_tag = request.form.get('tag')
+    
     if not allowed_file(file.filename):
         return jsonify({"error": "File type not allowed. Use PDF or DOCX"}), 400
     
     try:
-        
+        if not csrf_token:
+            return jsonify({"error": "Missing CSRF Token"}), 403
         file_path = save_uploaded_file(file)
         if not file_path:
-            return jsonify({"error": "Failed to save file"}), 500
+            return jsonify({"error": "Failed to save file or file type is invalid"}), 500
         
         file_ext = file.filename.rsplit('.', 1)[1].lower()
         
-        html_content = convert_to_html(file_path, file_ext)
+        html_content = None
+        try:
+            html_content = convert_to_html(file_path, file_ext)
+            if html_content is None:
+                raise RuntimeError("Conversion returned None, indicating a failure handled internally.")
+
+        except Exception as e:
+            import traceback
+            print(f"CRITICAL CONVERSION FAILURE captured in views.py for {file.filename}:\n{traceback.format_exc()}")
+            return jsonify({"error": f"Conversion failed on the backend: {str(e)}"}), 400
+        os.remove(file_path) 
         
         if not html_content:
-            return jsonify({"error": "Conversion failed. Check server logs."}), 400
+            return jsonify({"error": "Conversion process resulted in no content."}), 400
             
         return jsonify({"html": html_content}), 200
         
     except Exception as e:
+        # Catch any outer exceptions (e.g., permissions, directory issues)
         import traceback
-        print(f"CRITICAL ERROR in upload_file:\n{traceback.format_exc()}")
-        
+        print(f"CRITICAL UNEXPECTED ERROR in upload_file:\n{traceback.format_exc()}")
+        if 'file_path' in locals() and os.path.exists(file_path):
+             os.remove(file_path)
+
         try:
-            return jsonify({"error": "Server error"}), 500
+            return jsonify({"error": "An unexpected server error occurred during processing."}), 500
         except:
             return "Internal Server Error", 500
+
 
 
 @blueprint.route("/article/create/", methods=["POST"])

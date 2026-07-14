@@ -115,8 +115,16 @@ def convert_docx_to_html(file_path):
         html = apply_bootstrap_classes(html)
         return html
     except Exception as e:
-        print(f"DOCX conversion error: {str(e)}")
-        return None
+        print(f"pypandoc failed to convert DOCX directly ({e}). Trying fallback...")
+        try:
+            print(f"--- Pandoc Command Failure Detected ---")
+            print("Please ensure that 'pandoc' is installed on your system AND accessible in your system PATH.")
+            print("If running locally, you might need to manually install pandoc (e.g., using Homebrew or apt).")
+            
+            raise RuntimeError(f"DOCX conversion failed: Pandoc executable not found or corrupted. Original error: {str(e)}")
+        except Exception as e_fallback:
+            print(f"Fallback attempt also failed: {e_fallback}")
+            return None
 
 def convert_pdf_to_html(file_path):
     """Convert PDF file to HTML."""

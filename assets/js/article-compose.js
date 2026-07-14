@@ -79,19 +79,10 @@ function initializeArticleCompose() {
   const tagFeedback = document.getElementById("tagFeedback");
   const articleForm = document.getElementById("articleForm");
 
-  console.log("Initializing article compose...", {
-    titleInput,
-    tagInput,
-    tagStatus,
-    tagFeedback,
-    articleForm,
-  });
+  console.log("Initializing article compose...");
 
   if (!titleInput || !tagInput) {
-    console.error("Article compose elements not found", {
-      titleInput,
-      tagInput,
-    });
+    console.error("Article compose elements not found.");
     return;
   }
 
@@ -181,27 +172,21 @@ function initializeArticleCompose() {
       }
     });
   }
-
-  // Handle File Upload Form Submission separately
   const fileUploadForm = document.getElementById("fileUploadForm");
   if (fileUploadForm) {
     fileUploadForm.addEventListener("submit", function (e) {
       e.preventDefault();
-
       const formData = new FormData(this);
       const uploadUrl = this.dataset.uploadUrl;
-
-      // Get CSRF token from the meta tag in layout.html
       const csrfMeta = document.querySelector('meta[name="csrf-token"]');
       const csrfToken = csrfMeta ? csrfMeta.getAttribute("content") : null;
-
-      formData.append("csrf_token", csrfToken);
-
       if (!csrfToken) {
         alert("CSRF Token not found. Please reload the page.");
         return;
       }
-
+      formData.append("csrf_token", csrfToken);
+      formData.append("title", titleInput.value);
+      formData.append("tag", tagInput.value);
       fetch(uploadUrl, {
         method: "POST",
         headers: {
@@ -211,43 +196,81 @@ function initializeArticleCompose() {
       })
         .then((response) => {
           if (!response.ok) {
-            // Try to get error message from response text if JSON fails
-            return response.text().then((text) => {
-              throw new Error(text);
-            });
+            let errorText;
+            const contentType = response.headers.get("content-type");
+            if (contentType && contentType.includes("application/json")) {
+              return response.json().then((data) => ({ ok: false, data })); // Treat JSON errors gracefully
+            } else {
+              // If not JSON, read as text to capture potential HTML error page content
+              return response
+                .text()
+                .then((text) => ({ ok: false, message: text }));
+            }
           }
           return response.json();
         })
         .then((data) => {
+          if (typeof data === "object" && data !== null && !("ok" in data)) {
+            throw new Error(data.error || "Unknown API response error.");
+          }
           if (data.html) {
-            // Insert converted HTML into the EDITOR, not a generic div
             const articleContent = document.getElementById("articleContent");
+            const htmlContentView = document.getElementById("htmlContentView"); 
+            const contentInput = document.getElementById("contentInput"); 
+
             if (articleContent) {
-              // Switch to normal view if currently in HTML view to show formatted content
               switchToNormalView();
+              // 1. Update visible rich text editor area
               articleContent.innerHTML = data.html;
-
-              // Update hidden view as well
-              htmlContentView.value = data.html;
-
-              // Try to extract title from H1 tags
+              if (contentInput) {
+                contentInput.value = data.html;
+              }
+              if (htmlContentView) {
+                 htmlContentView.value = data.html;
+              }
+              console.log("Successfully processed HTML data:", data.html);
               extractTitleFromHTML(data.html);
 
-              alert("Document converted successfully!");
+              // CRITICAL FIXES APPLIED HERE:
+              // 2. Synchronize state fields with the conversion result's metadata if available, or use current values.
+              document.getElementById("articleTitle").value = titleInput.value || "Converted Article";
+              document.getElementById("articleTag").value = tagInput.value || slugify(titleInput.value);
+
+              // 3. Disable UI Elements to prevent accidental re-submission/navigation event on success
+              document.getElementById("fileInput").disabled = true; 
+              document.querySelector('#fileUploadForm button[type="submit"]').disabled = true;
+
+              alert("Document converted successfully! Please review content above.");
             } else {
-              alert("Editor content area not found.");
-            }
-          } else if (data.error) {
-            alert("Conversion failed: " + data.error);
-          } else {
             // Unexpected response structure
             console.error("Unexpected server response:", data);
             alert("Server returned unexpected data.");
+            }
           }
         })
         .catch((error) => {
           console.error("Upload error:", error);
+          let errorMessage = "";
           alert("An error occurred during upload.");
+          if (typeof error === "object" && error !== null && !("message" in error)) {
+            const dataObject = Object.assign({}, error, { message: "" }); 
+            if (dataObject.ok === false && dataObject.message) {
+              errorMessage = `Server responded with error status (${error.status || "?"}). Details: ${dataObject.message}`;
+            } else if (typeof dataObject.message === "string") {
+              errorMessage += dataObject.message;
+            }
+          } else if (error instanceof Error) {
+            errorMessage += error.message;
+          }
+          if (typeof error === "object" && error !== null && error.message && (error.message.includes("HTTP") || error.message.includes("[HTTP"))) {
+            errorMessage = error.message;
+          } else if (error instanceof Error) {
+            errorMessage += `Operation failed: ${error.message}`;
+          }
+
+          alert(
+            `File Upload Failed!\\n\\n--- ERROR DETAILS --- \\n${errorMessage}`
+          );
         });
     });
   }
@@ -406,6 +429,4 @@ function initializeArticleCompose() {
 // Run initialization when DOM is ready
 if (document.readyState === "loading") {
   document.addEventListener("DOMContentLoaded", initializeArticleCompose);
-} else {
-  initializeArticleCompose();
 }
