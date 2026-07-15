@@ -36,7 +36,7 @@ def compose_article(error=None):
     return render_template("users/compose_article.html", error=error)
 
 
-@blueprint.route("/upload/") #, methods=["POST"])
+@blueprint.route("/upload/", methods=["POST"])
 @login_required
 def upload_file():
     """Handle file upload and conversion."""
