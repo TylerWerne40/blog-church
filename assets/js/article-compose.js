@@ -272,64 +272,70 @@ function initializeArticleCompose() {
         })
           .then((response) => {
             if (!response.ok) {
-              let errorText;
-              const contentType = response.headers.get("content-type");
-              if (contentType && contentType.includes("application/json")) {
-                return response.json().then((data) => ({ ok: false, data })); // Treat JSON errors gracefully
-              } else {
-                // If not JSON, read as text to capture potential HTML error page content
-                return response
-                  .text()
-                  .then((text) => ({ ok: false, message: text }));
-              }
+              // Server returned an error status (400, 500, etc.)
+              return response.json().catch(() => ({}))
+                .then(errData => {
+                  throw new Error(errData.error || `Server error: ${response.status}`);
+                });
             }
             return response.json();
           })
           .then((data) => {
-            if (typeof data === "object" && data !== null && !("ok" in data)) {
-              throw new Error(data.error || "Unknown API response error.");
+            if (data && data.error) {
+              throw new Error(data.error);
             }
-            if (data.html) {
-              // const articleContent = document.getElementById("articleContent");
+
+            if (data && data.html) {
+              // === SUCCESS PATH ===
               const htmlContentView = document.getElementById("htmlContentView");
               const contentInput = document.getElementById("contentInput");
 
               if (articleContent) {
-                if (typeof switchToNormalView === "function")
-                  switchToNormalView();
+                // Switch to Normal View (safe inline version)
+                const normalViewTabEl = document.getElementById("normal-view-tab");
+                const htmlViewTabEl = document.getElementById("html-view-tab");
+                const normalViewContainerEl = document.getElementById("normalViewContainer");
+                const htmlContentViewEl = document.getElementById("htmlContentView");
+
+                if (normalViewTabEl && htmlViewTabEl && normalViewContainerEl && htmlContentViewEl) {
+                  normalViewTabEl.classList.add("active");
+                  htmlViewTabEl.classList.remove("active");
+                  normalViewContainerEl.style.display = "block";
+                  htmlContentViewEl.style.display = "none";
+                  normalViewTabEl.style.borderBottom = "none";
+                  htmlViewTabEl.style.borderBottom = "1px solid #dee2e6";
+                }
+
                 articleContent.innerHTML = data.html;
                 if (contentInput) contentInput.value = data.html;
                 if (htmlContentView) htmlContentView.value = data.html;
 
-                if (typeof extractTitleFromHTML === "function")
+                if (typeof extractTitleFromHTML === "function") {
                   extractTitleFromHTML(data.html);
-                const fallbackTitle = data.title || "Converted Article";
-                const fallbackTag = data.tag || slugify(fallbackTitle);
-                console.log("Fallback Title:", fallbackTitle);
-                console.log("Fallback Tag:", fallbackTag);
-                // Safe assignment via localized elements
+                }
+
+                // Fallback title / tag
                 const tElem = document.getElementById("articleTitle");
                 const gElem = document.getElementById("articleTag");
-                if (tElem) tElem.value = fallbackTitle || "Converted Article";
-                if (gElem)
-                  gElem.value =
-                    fallbackTag ||
-                    (typeof slugify === "function" ? slugify(fallbackTitle) : "");
+                if (tElem && !tElem.value) {
+                  tElem.value = data.title || "Converted Article";
+                }
+                if (gElem && !gElem.value) {
+                  const fbTag = data.tag || (typeof slugify === "function" ? slugify(tElem?.value || "converted-article") : "");
+                  gElem.value = fbTag;
+                }
 
+                // Disable upload controls
                 const fInput = document.getElementById("fileInput");
-                const sBtn = fileUploadForm.querySelector(
-                  'button[type="submit"]',
-                );
+                const sBtn = fileUploadForm?.querySelector('button[type="submit"]');
                 if (fInput) fInput.disabled = true;
                 if (sBtn) sBtn.disabled = true;
 
                 alert("Document converted successfully!");
-              } else {
-                // Unexpected response structure
-                console.log("Unexpected response structure:", data);
-                console.error("Unexpected server response:", data);
-                alert("Server returned unexpected data.");
               }
+            } else {
+              console.error("Unexpected response shape:", data);
+              alert("Server returned unexpected data.");
             }
           })
           .catch((error) => {
